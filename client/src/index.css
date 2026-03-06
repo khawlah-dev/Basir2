@@ -1,0 +1,120 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: 'Cairo', sans-serif;
+  --font-display: 'Tajawal', sans-serif;
+
+  /* Deep Teal & Blue Professional Palette - Adjusted for Logo */
+  --background: 195 20% 98%;
+  --foreground: 195 50% 10%;
+  
+  --card: 0 0% 100%;
+  --card-foreground: 195 50% 10%;
+  
+  --popover: 0 0% 100%;
+  --popover-foreground: 195 50% 10%;
+  
+  --primary: 200 85% 35%; /* Blue from logo */
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 25 85% 55%; /* Orange from logo */
+  --secondary-foreground: 0 0% 100%;
+  
+  --muted: 195 20% 90%;
+  --muted-foreground: 195 16% 40%;
+  
+  --accent: 195 85% 30%; /* Darker Blue */
+  --accent-foreground: 0 0% 100%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 195 20% 85%;
+  --input: 195 20% 85%;
+  --ring: 185 81% 29%;
+
+  --radius: 0.75rem;
+
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 195 50% 10%;
+  --sidebar-primary: 185 81% 29%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 195 20% 94%;
+  --sidebar-accent-foreground: 195 50% 10%;
+  --sidebar-border: 195 20% 85%;
+  --sidebar-ring: 185 81% 29%;
+}
+
+.dark {
+  --background: 195 50% 5%;
+  --foreground: 195 20% 98%;
+  
+  --card: 195 50% 8%;
+  --card-foreground: 195 20% 98%;
+  
+  --popover: 195 50% 8%;
+  --popover-foreground: 195 20% 98%;
+  
+  --primary: 185 60% 45%;
+  --primary-foreground: 195 50% 10%;
+  
+  --secondary: 195 30% 15%;
+  --secondary-foreground: 195 20% 98%;
+  
+  --muted: 195 30% 15%;
+  --muted-foreground: 195 20% 65%;
+  
+  --accent: 185 60% 45%;
+  --accent-foreground: 195 50% 10%;
+  
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 195 20% 98%;
+
+  --border: 195 30% 15%;
+  --input: 195 30% 15%;
+  --ring: 185 60% 45%;
+
+  --sidebar-background: 195 50% 7%;
+  --sidebar-foreground: 195 20% 98%;
+  --sidebar-primary: 185 60% 45%;
+  --sidebar-primary-foreground: 195 50% 10%;
+  --sidebar-accent: 195 30% 15%;
+  --sidebar-accent-foreground: 195 20% 98%;
+  --sidebar-border: 195 30% 15%;
+}
+
+@layer base {
+  html {
+    direction: rtl;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply font-bold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .hover-elevate {
+    @apply transition-all duration-300;
+  }
+  .hover-elevate:hover {
+    @apply -translate-y-1 shadow-lg shadow-primary/10 border-primary/30;
+  }
+  .active-elevate-2:active {
+    @apply translate-y-0 shadow-sm;
+  }
+  
+  .glass-panel {
+    @apply bg-white/80 dark:bg-black/50 backdrop-blur-xl border border-white/20 dark:border-white/10;
+  }
+}

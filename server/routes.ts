@@ -217,10 +217,18 @@ export async function registerRoutes(
       const indicators = await storage.getIndicators();
       const teacherIndicators = indicators.filter(i => i.teacherId === teacherId && i.status === 'approved');
 
+      // Get teacher flags (administrative notes)
+      const flags = await storage.getFlags();
+      const teacherFlags = flags.filter(f => f.teacherId === teacherId);
+
       // Combine them to prompt
-      const prompt = `قم بتقييم هذا المعلم بناءً على الشواهد والمؤشرات التالية.
-  الرجاء استخراج درجة نهائية (درجة موضوعية من 100) وتقديم تقييم لكل شاهد على حدة.
-  المعايير المطلوبة:
+      const prompt = `قم بتقييم هذا المعلم بناءً على الشواهد، المؤشرات، والملاحظات الإدارية التالية.
+  المطلوب بدقة شديدة:
+  1. استخراج درجة نهائية (totalScore) كـ "رقم عشري دقيق جداً للمفاضلة" (مثلاً 96.45 أو 88.12) من أصل 100 لتجنب التساوي بين المعلمين ذوي المستويات المتقاربة.
+  2. تقديم تقييم لكل شاهد على حدة من حيث (الأصالة، الابتكار، والجهد).
+  3. كتابة خلاصة للمفاضلة (tieBreakerSummary) تشرح بوضوح شديد سبب إعطائك هذه الدرجة العشرية المحددة، وكيف أثرت الملاحظات الإدارية أو الساعات التطوعية/التدريبية أو جودة الشواهد في تحديد الفواصل العشرية.
+
+  المعايير الأساسية للتوزيع:
   أداء الواجبات الوظيفية 10%
   التفاعل مع المجتمع المهني 10%
   التفاعل مع أولياء الأمور 10%
@@ -233,19 +241,23 @@ export async function registerRoutes(
   تحليل نتائج المتعلمين وتشخيص مستواهم 10%
   تنوع اساليب التقييم 10%
 
-  الشواهد:
+  الشواهد المعرفية:
   ${teacherEvidences.map((e, i) => `${i+1}. ${e.criteria} - ${e.description}`).join('\n')}
 
-  المؤشرات:
+  المؤشرات والجهود (تدريب/تطوع):
   ${teacherIndicators.map((e, i) => `${i+1}. ${e.title} (${e.type}) - ${e.hours} ساعات`).join('\n')}
 
-  قم بإرجاع التقييم بتنسيق JSON فقط:
+  الملاحظات الإدارية والانضباطية:
+  ${teacherFlags.length > 0 ? teacherFlags.map((f, i) => `${i+1}. ${f.note}`).join('\n') : "لا توجد ملاحظات إدارية."}
+
+  قم بإرجاع التقييم بتنسيق JSON فقط كما يلي:
   {
-    "totalScore": 85,
+    "totalScore": 96.45,
     "details": [
-      { "criteria": "أداء الواجبات", "score": 9, "note": "ملاحظة..." }
+      { "criteria": "أداء الواجبات", "score": 9.5, "note": "ملاحظة..." }
     ],
-    "summary": "ملخص عام"
+    "tieBreakerSummary": "تفوق هذا المعلم بـ 0.45 نقطة بفضل مبادرته التطوعية الفريدة وخلو سجله من الملاحظات السلبية...",
+    "summary": "ملخص عام لأداء المعلم"
   }
   `;
       

@@ -65,7 +65,7 @@ export function AppSidebar() {
             <img src={logoImg} alt="بصير" className="w-full h-full object-contain" />
           </div>
           <div>
-            <h2 className="font-display font-bold text-lg text-primary">منصة بصير</h2>
+            <h2 className="font-display font-bold text-lg text-primary">بصير</h2>
             <p className="text-xs text-muted-foreground">{user.name}</p>
           </div>
         </div>

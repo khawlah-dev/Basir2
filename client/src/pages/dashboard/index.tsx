@@ -1,10 +1,14 @@
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
-import { Activity, BarChart4, FileText, Users } from "lucide-react";
+import { useEvaluations } from "@/hooks/use-evaluations";
+import { useUsers } from "@/hooks/use-users";
+import { Activity, BarChart4, FileText, Users, Award, Trophy } from "lucide-react";
 
 export function DashboardHome() {
   const { data: user } = useAuth();
+  const { data: evals } = useEvaluations();
+  const { data: users } = useUsers();
 
   if (user?.role === 'teacher') {
     return (
@@ -23,11 +27,28 @@ export function DashboardHome() {
     );
   }
 
+  // Calculate top 7 evaluated teachers
+  const teachers = users?.filter(u => u.role === 'teacher') || [];
+
+  // Create a sorted list of unique teachers by highest evaluation
+  const topEvaluations = [...(evals || [])]
+    .sort((a, b) => b.totalScore - a.totalScore)
+    // Optional: filter to make sure we only grab latest evaluation per teacher if there are duplicates
+    .reduce((acc: typeof evals, current) => {
+      const x = acc?.find(item => item.teacherId === current.teacherId);
+      if (!x) {
+        return (acc || []).concat([current]);
+      } else {
+        return acc || [];
+      }
+    }, [])
+    ?.slice(0, 7) || [];
+
   const stats = [
     { title: "الشواهد المرفوعة", value: "24", icon: FileText, color: "text-blue-500", bg: "bg-blue-50" },
     { title: "المؤشرات المعتمدة", value: "12", icon: Activity, color: "text-emerald-500", bg: "bg-emerald-50" },
-    { title: "التقييمات المنجزة", value: "3", icon: BarChart4, color: "text-purple-500", bg: "bg-purple-50" },
-    { title: "المعلمين", value: "45", icon: Users, color: "text-amber-500", bg: "bg-amber-50" },
+    { title: "التقييمات المنجزة", value: evals?.length || "0", icon: BarChart4, color: "text-purple-500", bg: "bg-purple-50" },
+    { title: "المعلمين", value: teachers.length || "0", icon: Users, color: "text-amber-500", bg: "bg-amber-50" },
   ];
 
   return (
@@ -57,20 +78,56 @@ export function DashboardHome() {
         ))}
       </div>
 
-      <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="p-8 border-none shadow-md bg-gradient-to-br from-primary to-accent text-white">
-          <h3 className="text-2xl font-display font-bold mb-4">نقرأ الأداء لنقود التحسين</h3>
-          <p className="text-primary-foreground/80 leading-relaxed text-lg">
-            منصة بصير تهدف إلى أتمتة عملية تقييم الأداء المدرسي عبر تحليل الشواهد والمؤشرات باستخدام أحدث تقنيات الذكاء الاصطناعي لضمان الموضوعية والدقة.
-          </p>
-        </Card>
-        
-        <Card className="p-8 border-none shadow-md flex flex-col justify-center items-center text-center bg-card">
-          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-            <Activity className="w-10 h-10 text-primary" />
+      <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Banner / Status Box */}
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          <Card className="p-8 border-none shadow-md bg-gradient-to-br from-primary to-accent text-white flex-grow">
+            <h3 className="text-2xl font-display font-bold mb-4">نقرأ الأداء لنقود التحسين</h3>
+            <p className="text-primary-foreground/80 leading-relaxed text-lg">
+              منصة بصير تهدف إلى أتمتة عملية تقييم الأداء المدرسي عبر تحليل الشواهد والمؤشرات باستخدام أحدث تقنيات الذكاء الاصطناعي لضمان الموضوعية والدقة.
+            </p>
+          </Card>
+
+          <Card className="p-8 border-none shadow-md flex flex-col justify-center items-center text-center bg-card">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+              <Activity className="w-10 h-10 text-primary" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">حالة النظام</h3>
+            <p className="text-muted-foreground">جميع الأنظمة تعمل بكفاءة عالية. الذكاء الاصطناعي جاهز لاستقبال التقييمات الجديدة والفرز الدقيق.</p>
+          </Card>
+        </div>
+
+        {/* Top 7 Leaderboard */}
+        <Card className="p-6 border-none shadow-md flex flex-col bg-card lg:col-span-1 border border-border/50">
+          <div className="flex items-center gap-2 mb-6 border-b pb-4">
+            <Trophy className="w-6 h-6 text-amber-500" />
+            <h3 className="text-xl font-display font-bold text-foreground">لوحة الشرف الكفاءات (أفضل 7)</h3>
           </div>
-          <h3 className="text-xl font-bold mb-2">حالة النظام</h3>
-          <p className="text-muted-foreground">جميع الأنظمة تعمل بكفاءة عالية. الذكاء الاصطناعي جاهز لاستقبال التقييمات الجديدة.</p>
+
+          <div className="flex flex-col gap-4">
+            {topEvaluations.length > 0 ? (
+              topEvaluations.map((evalRecord, index) => {
+                const tUser = teachers.find(u => u.id === evalRecord.teacherId);
+                return (
+                  <div key={evalRecord.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-transparent hover:border-primary/20 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-white ${index === 0 ? 'bg-amber-400' : index === 1 ? 'bg-slate-400' : index === 2 ? 'bg-amber-600' : 'bg-primary/80'}`}>
+                        {index + 1}
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm">{tUser?.name || 'معلم مجهول'}</p>
+                      </div>
+                    </div>
+                    <div className="text-primary font-bold bg-primary/10 px-2 py-1 rounded">
+                      {evalRecord.totalScore}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">لا يوجد تقييمات منجزة حتى الآن.</p>
+            )}
+          </div>
         </Card>
       </div>
     </DashboardLayout>

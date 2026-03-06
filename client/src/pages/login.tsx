@@ -24,7 +24,7 @@ export function Login() {
       <Card className="w-full max-w-md p-8 shadow-2xl border-white/40 glass-panel relative z-10">
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-gradient-to-tr from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary/30 rotate-3 hover:rotate-0 transition-transform duration-300">
-            <span className="text-4xl font-display font-bold text-white">ب</span>
+            <span className="text-4xl font-display font-bold text-white">VE</span>
           </div>
           <h1 className="text-3xl font-display font-bold text-foreground">تسجيل الدخول</h1>
           <p className="text-muted-foreground mt-2 font-medium">مرحباً بك في منصة بصير التعليمية</p>

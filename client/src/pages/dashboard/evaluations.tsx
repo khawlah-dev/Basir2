@@ -43,8 +43,8 @@ export function EvaluationsManager() {
                 ))}
               </SelectContent>
             </Select>
-            <Button 
-              onClick={handleStart} 
+            <Button
+              onClick={handleStart}
               disabled={!selectedTeacher || startEval.isPending}
               className="bg-gradient-to-r from-primary to-accent hover-elevate"
             >
@@ -80,6 +80,18 @@ export function EvaluationsManager() {
                     </div>
                   </div>
                 </div>
+                {/* Render tie-breaker and detailed info */}
+                {(evaluation.details as any)?.tieBreakerSummary && (
+                  <div className="p-4 bg-muted/30 border-t">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Bot className="w-4 h-4 text-primary" />
+                      <span className="font-bold text-sm text-foreground">الرؤية التحليلية للمفاضلة</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {(evaluation.details as any).tieBreakerSummary}
+                    </p>
+                  </div>
+                )}
               </Card>
             )
           })}

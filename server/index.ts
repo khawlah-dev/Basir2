@@ -7,6 +7,12 @@ import { createServer } from "http";
 const app = express();
 const httpServer = createServer(app);
 
+import expressSession from "express-session";
+import createMemoryStore from "memorystore";
+import fs from "fs";
+
+const MemoryStore = createMemoryStore(expressSession);
+
 declare module "http" {
   interface IncomingMessage {
     rawBody: unknown;
@@ -23,6 +29,23 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false, limit: "20mb" }));
+
+app.use(expressSession({
+  secret: process.env.SESSION_SECRET || "baseer_secret",
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false },
+  store: new MemoryStore({
+    checkPeriod: 86400000
+  }),
+}));
+
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api")) {
+    console.log(`[SESSION CHECK] ${req.method} ${req.path} session exists: ${!!req.session}`);
+  }
+  next();
+});
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {

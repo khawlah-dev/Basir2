@@ -49,6 +49,8 @@ export const evaluations = pgTable("evaluations", {
   id: serial("id").primaryKey(),
   teacherId: integer("teacher_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   evaluatorId: integer("evaluator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  aiScore: real("ai_score").notNull(),
+  manualScore: real("manual_score"),
   totalScore: real("total_score").notNull(),
   details: jsonb("details").notNull(), // AI response details
   createdAt: timestamp("created_at").defaultNow(),

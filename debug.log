@@ -1,0 +1,69 @@
+[API MONITOR] 2026-03-07T21:43:29.261Z GET /auth/me
+[API MONITOR] 2026-03-07T21:43:29.264Z GET /evaluations
+[API MONITOR] 2026-03-07T21:43:29.265Z GET /users
+[API MONITOR] 2026-03-07T21:43:43.385Z POST /auth/login
+[API MONITOR] 2026-03-07T21:43:44.005Z GET /evaluations
+[API MONITOR] 2026-03-07T21:43:44.006Z GET /users
+[API MONITOR] 2026-03-07T21:43:44.007Z GET /evidences
+[API MONITOR] 2026-03-07T21:43:44.009Z GET /indicators
+[2026-03-07T21:43:53.065Z] HIT /api/manual-eval with body: {"teacherId":3,"manualScore":99}
+[2026-03-07T21:43:53.065Z] Error in manual evaluation: Cannot read properties of undefined (reading 'userId')
+[API MONITOR] 2026-03-07T21:46:28.233Z GET /auth/me
+[API MONITOR] 2026-03-07T21:46:28.246Z GET /evaluations
+[API MONITOR] 2026-03-07T21:46:28.246Z GET /users
+[2026-03-07T21:46:33.646Z] HIT /api/manual-eval with body: {"teacherId":3,"manualScore":99}
+[2026-03-07T21:46:33.646Z] Error in manual evaluation: Cannot read properties of undefined (reading 'userId')
+[2026-03-07T21:46:37.194Z] HIT /api/manual-eval with body: {"teacherId":4,"manualScore":99}
+[2026-03-07T21:46:37.194Z] Error in manual evaluation: Cannot read properties of undefined (reading 'userId')
+[API MONITOR] 2026-03-07T21:46:39.046Z POST /evaluations/start
+[API MONITOR] 2026-03-07T21:46:46.628Z GET /auth/me
+[API MONITOR] 2026-03-07T21:46:46.635Z GET /evaluations
+[API MONITOR] 2026-03-07T21:46:46.635Z GET /users
+[API MONITOR] 2026-03-07T21:46:53.321Z POST /evaluations/start
+[API MONITOR] 2026-03-07T21:47:28.004Z GET /evaluations
+[2026-03-07T21:47:40.378Z] HIT /api/manual-eval with body: {"teacherId":4,"manualScore":55}
+[2026-03-07T21:47:40.378Z] Error in manual evaluation: Cannot read properties of undefined (reading 'userId')
+[2026-03-07T21:49:43.867Z] HIT /api/manual-eval with body: {"teacherId":4,"manualScore":55}
+[2026-03-07T21:49:43.867Z] Error in manual evaluation: Cannot read properties of undefined (reading 'userId')
+[API MONITOR] 2026-03-07T21:49:47.158Z GET /evaluations
+[API MONITOR] 2026-03-07T21:49:47.165Z GET /auth/me
+[API MONITOR] 2026-03-07T21:49:47.165Z GET /users
+[2026-03-07T21:49:53.527Z] HIT /api/manual-eval with body: {"teacherId":4,"manualScore":80}
+[2026-03-07T21:49:53.527Z] Error in manual evaluation: Cannot read properties of undefined (reading 'userId')
+[API MONITOR] 2026-03-07T21:52:34.894Z GET /evaluations
+[API MONITOR] 2026-03-07T21:52:34.896Z GET /auth/me
+[API MONITOR] 2026-03-07T21:52:34.897Z GET /users
+[API MONITOR] 2026-03-07T21:56:36.921Z GET /auth/me
+[API MONITOR] 2026-03-07T21:56:36.922Z GET /evaluations
+[API MONITOR] 2026-03-07T21:56:36.930Z GET /users
+[2026-03-07T22:00:19.678Z] HIT /api/manual-eval with body: {"teacherId":4,"manualScore":99}
+[2026-03-07T22:00:19.678Z] Error in manual evaluation: Cannot read properties of undefined (reading 'userId')
+[2026-03-07T22:00:27.190Z] HIT /api/manual-eval with body: {"teacherId":4,"manualScore":99}
+[2026-03-07T22:00:27.190Z] Error in manual evaluation: Cannot read properties of undefined (reading 'userId')
+[API MONITOR] 2026-03-07T22:02:56.328Z GET /evaluations
+[API MONITOR] 2026-03-07T22:02:56.332Z GET /auth/me
+[API MONITOR] 2026-03-07T22:02:56.333Z GET /users
+[2026-03-07T22:03:04.658Z] HIT /api/manual-eval with body: {"teacherId":3,"manualScore":99}
+[2026-03-07T22:03:04.658Z] Error in manual evaluation: Cannot read properties of undefined (reading 'userId')
+[API MONITOR] 2026-03-07T22:04:59.031Z GET /auth/me
+[API MONITOR] 2026-03-07T22:04:59.036Z GET /evaluations
+[API MONITOR] 2026-03-07T22:04:59.036Z GET /users
+[2026-03-07T22:05:07.306Z] HIT /api/manual-eval with body: {"teacherId":3,"manualScore":99}
+[2026-03-07T22:05:07.306Z] Error in manual evaluation: Cannot read properties of undefined (reading 'userId')
+[API MONITOR] 2026-03-07T22:06:59.543Z GET /auth/me
+[API MONITOR] 2026-03-07T22:06:59.546Z GET /evaluations
+[API MONITOR] 2026-03-07T22:06:59.547Z GET /users
+[2026-03-07T22:07:07.556Z] HIT /api/manual-eval with body: {"teacherId":3,"manualScore":99}
+[2026-03-07T22:07:07.556Z] Error in manual evaluation: Cannot read properties of undefined (reading 'userId')
+[API MONITOR] 2026-03-07T22:08:42.882Z GET /auth/me
+[API MONITOR] 2026-03-07T22:08:42.884Z GET /evaluations
+[API MONITOR] 2026-03-07T22:08:42.889Z GET /users
+[API MONITOR] 2026-03-07T22:10:00.992Z POST /auth/login
+[API MONITOR] 2026-03-07T22:10:01.739Z GET /indicators
+[API MONITOR] 2026-03-07T22:10:01.742Z GET /evidences
+[API MONITOR] 2026-03-07T22:10:04.370Z POST /auth/logout
+[API MONITOR] 2026-03-07T22:10:05.238Z POST /auth/login
+[API MONITOR] 2026-03-07T22:10:13.137Z POST /manual-eval
+[2026-03-07T22:10:13.138Z] HIT /api/manual-eval with body: {"teacherId":3,"manualScore":99}
+[2026-03-07T22:10:13.138Z] Successfully created manual evaluation ID: 15
+[API MONITOR] 2026-03-07T22:10:14.295Z GET /evaluations

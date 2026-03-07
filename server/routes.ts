@@ -5,7 +5,6 @@ import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { type InsertEvidence } from "@shared/schema";
-import expressSession from "express-session";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -72,6 +71,14 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  console.log("Registering routes (session should be initialized globally)");
+
+  app.use("/api", (req, res, next) => {
+    const timestamp = new Date().toISOString();
+    console.log(`[API MONITOR] ${timestamp} ${req.method} ${req.path}`);
+    fs.appendFileSync("debug.log", `[API MONITOR] ${timestamp} ${req.method} ${req.path}\n`);
+    next();
+  });
 
   // Ensure upload directory exists
   const uploadDir = path.join(process.cwd(), "uploads");
@@ -101,13 +108,46 @@ export async function registerRoutes(
     next();
   }, express.static(uploadDir));
 
-  // Session setup
-  app.use(expressSession({
-    secret: process.env.SESSION_SECRET || "baseer_secret",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false }
-  }));
+  // Manual evaluation route - moved after potentially global session
+  app.post("/api/manual-eval", async (req, res) => {
+    const timestamp = new Date().toISOString();
+    const logData = `[${timestamp}] HIT /api/manual-eval with body: ${JSON.stringify(req.body)}\n`;
+    console.log(logData);
+    fs.appendFileSync("debug.log", logData);
+
+    try {
+      const { teacherId, manualScore } = api.evaluations.createManual.input.parse(req.body);
+
+      // LOG STACK TRACE IF IT FAILS
+      let evaluatorId = 1;
+      try {
+        evaluatorId = (req.session as any)?.userId || 1;
+      } catch (err: any) {
+        console.error("[DEBUG] Failed to access session.userId:", err.message);
+      }
+
+      const evaluation = await storage.createEvaluation({
+        teacherId,
+        evaluatorId,
+        aiScore: 0,
+        manualScore,
+        totalScore: manualScore,
+        details: {
+          summary: "تقييم يدوي من قبل المدير",
+          tieBreakerSummary: "تم وضع هذا التقييم يدوياً بواسطة المدير دون تدخل الذكاء الاصطناعي."
+        }
+      });
+      const successMsg = `[${timestamp}] Successfully created manual evaluation ID: ${evaluation.id}\n`;
+      console.log(successMsg);
+      fs.appendFileSync("debug.log", successMsg);
+      res.status(201).json(evaluation);
+    } catch (e: any) {
+      const errorMsg = `[${timestamp}] Error in manual evaluation: ${e.message}\nSTACK: ${e.stack}\n`;
+      console.error(errorMsg);
+      fs.appendFileSync("debug.log", errorMsg);
+      res.status(400).json({ message: "Invalid request", details: e.message });
+    }
+  });
 
   // Auth routes
   app.post(api.auth.login.path, async (req, res) => {
@@ -117,7 +157,9 @@ export async function registerRoutes(
       if (!user || user.password !== password) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
-      (req.session as any).userId = user.id;
+      if (req.session) {
+        (req.session as any).userId = user.id;
+      }
       res.json(user);
     } catch (e) {
       res.status(400).json({ message: "Invalid request" });
@@ -125,7 +167,7 @@ export async function registerRoutes(
   });
 
   app.get(api.auth.me.path, async (req, res) => {
-    const userId = (req.session as any).userId;
+    const userId = (req.session as any)?.userId;
     if (!userId) {
       return res.status(401).json({ message: "Not authenticated" });
     }
@@ -137,7 +179,7 @@ export async function registerRoutes(
   });
 
   app.post(api.auth.logout.path, (req, res) => {
-    req.session.destroy(() => {
+    req.session?.destroy(() => {
       res.json({ success: true });
     });
   });
@@ -302,7 +344,7 @@ export async function registerRoutes(
     console.log("Evaluation start requested for teacher:", req.body.teacherId);
     try {
       const { teacherId } = api.evaluations.start.input.parse(req.body);
-      const evaluatorId = (req.session as any).userId;
+      const evaluatorId = (req.session as any)?.userId || 1;
       console.log("Evaluator ID from session:", evaluatorId);
 
       // Get teacher evidences & indicators
@@ -407,6 +449,7 @@ export async function registerRoutes(
       const evaluation = await storage.createEvaluation({
         teacherId,
         evaluatorId: evaluatorId || 1,
+        aiScore: Number(aiResponse.totalScore) || 0,
         totalScore: Number(aiResponse.totalScore) || 0,
         details: aiResponse
       });
@@ -415,6 +458,25 @@ export async function registerRoutes(
     } catch (e: any) {
       console.error(e);
       res.status(500).json({ message: "Failed to evaluate via AI", details: e.message });
+    }
+  });
+
+  app.patch(api.evaluations.updateScore.path, async (req, res) => {
+    fs.appendFileSync("debug.log", `[${new Date().toISOString()}] PATCH /${req.params.id}/score: ${JSON.stringify(req.body)}\n`);
+    try {
+      const id = Number(req.params.id);
+      const { manualScore } = api.evaluations.updateScore.input.parse(req.body);
+
+      const evaluation = await storage.updateEvaluationScore(id, manualScore);
+      if (!evaluation) {
+        fs.appendFileSync("debug.log", `[${new Date().toISOString()}] Eval ${id} not found\n`);
+        return res.status(404).json({ message: "Evaluation not found" });
+      }
+      fs.appendFileSync("debug.log", `[${new Date().toISOString()}] Updated ID: ${id}\n`);
+      res.json(evaluation);
+    } catch (e: any) {
+      fs.appendFileSync("debug.log", `[${new Date().toISOString()}] Error: ${e.message}\n`);
+      res.status(400).json({ message: "Invalid request", details: e.message });
     }
   });
 

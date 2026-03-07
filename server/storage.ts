@@ -44,6 +44,7 @@ export interface IStorage {
   // Evaluations
   getEvaluations(): Promise<Evaluation[]>;
   createEvaluation(evaluation: InsertEvaluation): Promise<Evaluation>;
+  updateEvaluationScore(id: number, manualScore: number): Promise<Evaluation | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -151,11 +152,32 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createEvaluation(evaluation: InsertEvaluation): Promise<Evaluation> {
+    console.log("Database: Deleting old evaluations for teacher:", evaluation.teacherId);
     // Delete any old evaluation for this teacher to ensure only one exists
     await db.delete(evaluations).where(eq(evaluations.teacherId, evaluation.teacherId));
 
+    console.log("Database: Inserting new evaluation:", evaluation);
     const [newEvaluation] = await db.insert(evaluations).values(evaluation).returning();
+    console.log("Database: Evaluation created with ID:", newEvaluation.id);
     return newEvaluation;
+  }
+
+  async updateEvaluationScore(id: number, manualScore: number): Promise<Evaluation | undefined> {
+    console.log(`Database: Updating evaluation ${id} with manual score ${manualScore}`);
+    const [updated] = await db.update(evaluations)
+      .set({
+        manualScore,
+        totalScore: manualScore
+      })
+      .where(eq(evaluations.id, id))
+      .returning();
+
+    if (updated) {
+      console.log(`Database: Successfully updated evaluation ${id}`);
+    } else {
+      console.warn(`Database: No evaluation found with ID ${id} for update`);
+    }
+    return updated;
   }
 }
 

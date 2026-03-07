@@ -160,6 +160,21 @@ export const api = {
       path: '/api/evaluations/start' as const,
       input: z.object({ teacherId: z.number() }),
       responses: { 201: z.custom<typeof evaluations.$inferSelect>() }
+    },
+    createManual: {
+      method: 'POST' as const,
+      path: '/api/manual-eval' as const,
+      input: z.object({ teacherId: z.number(), manualScore: z.number().min(0).max(100) }),
+      responses: { 201: z.custom<typeof evaluations.$inferSelect>() }
+    },
+    updateScore: {
+      method: 'PATCH' as const,
+      path: '/api/evaluations/:id/score' as const,
+      input: z.object({ manualScore: z.number().min(0).max(100) }),
+      responses: {
+        200: z.custom<typeof evaluations.$inferSelect>(),
+        404: errorSchemas.notFound,
+      }
     }
   },
   ai: {

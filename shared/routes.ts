@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { 
+import {
   insertSchoolSchema, schools,
   insertUserSchema, users,
   insertFlagSchema, flags,
@@ -113,6 +113,17 @@ export const api = {
       path: '/api/evidences' as const,
       input: insertEvidenceSchema,
       responses: { 201: z.custom<typeof evidences.$inferSelect>() }
+    },
+    update: {
+      method: 'PATCH' as const,
+      path: '/api/evidences/:id' as const,
+      input: insertEvidenceSchema.partial(),
+      responses: { 200: z.custom<typeof evidences.$inferSelect>() }
+    },
+    delete: {
+      method: 'DELETE' as const,
+      path: '/api/evidences/:id' as const,
+      responses: { 204: z.void() }
     },
     approve: {
       method: 'POST' as const,

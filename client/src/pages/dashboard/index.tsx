@@ -3,12 +3,16 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import { useEvaluations } from "@/hooks/use-evaluations";
 import { useUsers } from "@/hooks/use-users";
+import { useEvidences } from "@/hooks/use-evidences";
+import { useIndicators } from "@/hooks/use-indicators";
 import { Activity, BarChart4, FileText, Users, Award, Trophy } from "lucide-react";
 
 export function DashboardHome() {
   const { data: user } = useAuth();
   const { data: evals } = useEvaluations();
   const { data: users } = useUsers();
+  const { data: evidences } = useEvidences();
+  const { data: indicators } = useIndicators();
 
   if (user?.role === 'teacher') {
     return (
@@ -45,8 +49,8 @@ export function DashboardHome() {
     ?.slice(0, 7) || [];
 
   const stats = [
-    { title: "الشواهد المرفوعة", value: "24", icon: FileText, color: "text-blue-500", bg: "bg-blue-50" },
-    { title: "المؤشرات المعتمدة", value: "12", icon: Activity, color: "text-emerald-500", bg: "bg-emerald-50" },
+    { title: "الشواهد المرفوعة", value: evidences?.length ?? "0", icon: FileText, color: "text-blue-500", bg: "bg-blue-50" },
+    { title: "المؤشرات المعتمدة", value: indicators?.length ?? "0", icon: Activity, color: "text-emerald-500", bg: "bg-emerald-50" },
     { title: "التقييمات المنجزة", value: evals?.length || "0", icon: BarChart4, color: "text-purple-500", bg: "bg-purple-50" },
     { title: "المعلمين", value: teachers.length || "0", icon: Users, color: "text-amber-500", bg: "bg-amber-50" },
   ];

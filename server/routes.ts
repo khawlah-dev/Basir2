@@ -181,6 +181,28 @@ export async function registerRoutes(
     res.status(201).json(evidence);
   });
 
+  app.patch(api.evidences.update.path, async (req, res) => {
+    const id = Number(req.params.id);
+    const input = api.evidences.update.input.parse(req.body);
+    const evidence = await storage.updateEvidence(id, input);
+    if (!evidence) return res.status(404).json({ message: "Evidence not found" });
+    res.json(evidence);
+  });
+
+  app.delete(api.evidences.delete.path, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid evidence ID" });
+      }
+      await storage.deleteEvidence(id);
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting evidence:", error);
+      res.status(500).json({ message: "Failed to delete evidence" });
+    }
+  });
+
   app.post(api.evidences.approve.path, async (req, res) => {
     const evidence = await storage.approveEvidence(Number(req.params.id));
     res.json(evidence);
@@ -299,7 +321,15 @@ export async function registerRoutes(
   app.post(api.ai.chat.path, async (req, res) => {
     try {
       const { message } = api.ai.chat.input.parse(req.body);
-      const prompt = `أنت مساعد ذكي لمنصة "بصير" التعليمية. مهمتك هي مساعدة المعلمين في فهم ما يحتاجون إرفاقه من شواهد ومؤشرات، وتقديم نصائح حول ذلك.\nسؤال المعلم: ${message}`;
+      const prompt = `أنت المساعد الذكي التفاعلي لمنصة "بصير" التعليمية. مهمتك تقديم إجابات سريعة، مختصرة ومباشرة للمعلمين حول الشواهد والمؤشرات.
+القواعد التوجيهية الصارمة:
+1. الإجابة يجب أن تكون قصيرة جداً ومباشرة (موجزة قدر الإمكان).
+2. استخدم القوائم النقطية (Bullet points) لسهولة القراءة.
+3. ممنوع منعاً باتاً كتابة مقدمات إنشائية أو ترحيبات طويلة (مثل "أهلاً بك أيها المعلم الفاضل..."). ادخل في صلب الموضوع فوراً.
+4. أعطِ أمثلة ملموسة عن الملفات التي يجب رفعها (مثل: ورقة عمل، صورة نشاط، شهادة حضور).
+5. نسق النص باستخدام Markdown (الخط العريض للكلمات المهمة).
+
+سؤال المعلم: ${message}`;
 
       const reply = await callGemini(prompt, []);
       res.json({ reply });

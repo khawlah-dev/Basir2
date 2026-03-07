@@ -32,6 +32,8 @@ export interface IStorage {
   // Evidences
   getEvidences(): Promise<Evidence[]>;
   createEvidence(evidence: InsertEvidence): Promise<Evidence>;
+  updateEvidence(id: number, updates: Partial<InsertEvidence>): Promise<Evidence | undefined>;
+  deleteEvidence(id: number): Promise<void>;
   approveEvidence(id: number): Promise<Evidence | undefined>;
 
   // Indicators
@@ -111,9 +113,18 @@ export class DatabaseStorage implements IStorage {
         eq(evidences.criteria, evidence.criteria)
       )
     );
-    
+
     const [newEvidence] = await db.insert(evidences).values(evidence).returning();
     return newEvidence;
+  }
+
+  async updateEvidence(id: number, updates: Partial<InsertEvidence>): Promise<Evidence | undefined> {
+    const [updated] = await db.update(evidences).set(updates).where(eq(evidences.id, id)).returning();
+    return updated;
+  }
+
+  async deleteEvidence(id: number): Promise<void> {
+    await db.delete(evidences).where(eq(evidences.id, id));
   }
 
   async approveEvidence(id: number): Promise<Evidence | undefined> {
@@ -142,7 +153,7 @@ export class DatabaseStorage implements IStorage {
   async createEvaluation(evaluation: InsertEvaluation): Promise<Evaluation> {
     // Delete any old evaluation for this teacher to ensure only one exists
     await db.delete(evaluations).where(eq(evaluations.teacherId, evaluation.teacherId));
-    
+
     const [newEvaluation] = await db.insert(evaluations).values(evaluation).returning();
     return newEvaluation;
   }

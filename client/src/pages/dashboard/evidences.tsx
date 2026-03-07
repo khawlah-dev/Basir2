@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { useEvidences, useCreateEvidence, useApproveEvidence } from "@/hooks/use-evidences";
+import { useEvidences, useCreateEvidence, useApproveEvidence, useUpdateEvidence, useDeleteEvidence } from "@/hooks/use-evidences";
 import { useUsers } from "@/hooks/use-users";
 import { useAuth } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, CheckCircle, FileImage, Clock } from "lucide-react";
+import { Loader2, CheckCircle, FileImage, Clock, Pencil, Trash2, X } from "lucide-react";
 import { ImageUpload } from "@/components/upload/image-upload";
+import { type Evidence } from "@shared/schema";
 
 const CRITERIA = [
   "أداء الواجبات الوظيفية 10%",
@@ -30,8 +31,13 @@ export function EvidencesManager() {
   const { data: users } = useUsers();
   const createEvidence = useCreateEvidence();
   const approveEvidence = useApproveEvidence();
+  const updateEvidence = useUpdateEvidence();
+  const deleteEvidence = useDeleteEvidence();
+
+  const formRef = useRef<HTMLDivElement>(null);
 
   // Upload Form State
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [criteria, setCriteria] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -41,13 +47,49 @@ export function EvidencesManager() {
     if (!criteria || !description || !imageUrl) return;
     if (!user) return;
 
-    await createEvidence.mutateAsync({
-      teacherId: user.id,
-      criteria,
-      description,
-      imageUrl
-    });
+    if (editingId !== null) {
+      await updateEvidence.mutateAsync({
+        id: editingId,
+        data: {
+          teacherId: user.id,
+          criteria,
+          description,
+          imageUrl
+        }
+      });
+      setEditingId(null);
+    } else {
+      await createEvidence.mutateAsync({
+        teacherId: user.id,
+        criteria,
+        description,
+        imageUrl
+      });
+    }
 
+    setCriteria(""); setDescription(""); setImageUrl("");
+  };
+
+  const handleEdit = (ev: Evidence) => {
+    setEditingId(ev.id);
+    setCriteria(ev.criteria);
+    setDescription(ev.description);
+    setImageUrl(ev.imageUrl || "");
+    formRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleDelete = async (id: number) => {
+    if (confirm("هل أنت متأكد من حذف هذا الشاهد نهائياً؟")) {
+      await deleteEvidence.mutateAsync(id);
+      if (editingId === id) {
+        setEditingId(null);
+        setCriteria(""); setDescription(""); setImageUrl("");
+      }
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
     setCriteria(""); setDescription(""); setImageUrl("");
   };
 
@@ -55,9 +97,11 @@ export function EvidencesManager() {
     return (
       <DashboardLayout>
         <div className="max-w-2xl mx-auto">
-          <div className="mb-8">
-            <h2 className="text-2xl font-display font-bold">رفع الشواهد</h2>
-            <p className="text-muted-foreground mt-1">قم برفع الصور التي تثبت كفاءتك في عناصر التقييم المختلفة.</p>
+          <div className="mb-8" ref={formRef}>
+            <h2 className="text-2xl font-display font-bold">{editingId ? 'تعديل الشاهد' : 'رفع الشواهد'}</h2>
+            <p className="text-muted-foreground mt-1">
+              {editingId ? 'قم بتحديث المعلومات المرتبطة بالشاهد المحدد.' : 'قم برفع الصور التي تثبت كفاءتك في عناصر التقييم المختلفة.'}
+            </p>
           </div>
 
           <Card className="p-6 border-border shadow-md">
@@ -88,10 +132,25 @@ export function EvidencesManager() {
                 />
               </div>
 
-              <Button type="submit" className="w-full text-lg h-12 shadow-lg" disabled={createEvidence.isPending}>
-                {createEvidence.isPending ? <Loader2 className="w-5 h-5 animate-spin me-2" /> : <FileImage className="w-5 h-5 me-2" />}
-                رفع واعتماد
-              </Button>
+              <div className="flex gap-4">
+                <Button type="submit" className="flex-1 text-lg h-12 shadow-md" disabled={createEvidence.isPending || updateEvidence.isPending}>
+                  {(createEvidence.isPending || updateEvidence.isPending) ? (
+                    <Loader2 className="w-5 h-5 animate-spin me-2" />
+                  ) : editingId ? (
+                    <Pencil className="w-5 h-5 me-2" />
+                  ) : (
+                    <FileImage className="w-5 h-5 me-2" />
+                  )}
+                  {editingId ? 'حفظ التعديلات' : 'رفع واعتماد'}
+                </Button>
+
+                {editingId && (
+                  <Button type="button" variant="outline" className="h-12 w-12 shrink-0 md:w-auto md:px-6" onClick={cancelEdit}>
+                    <X className="w-5 h-5 md:me-2" />
+                    <span className="hidden md:inline">إلغاء</span>
+                  </Button>
+                )}
+              </div>
             </form>
           </Card>
 
@@ -121,6 +180,15 @@ export function EvidencesManager() {
                   <div className="p-4 flex flex-col flex-1">
                     <h4 className="font-bold text-md text-primary">{ev.criteria}</h4>
                     <p className="text-sm text-muted-foreground mt-2 line-clamp-3 leading-relaxed flex-1">{ev.description}</p>
+
+                    <div className="mt-4 flex gap-2 pt-4 border-t">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(ev)}>
+                        <Pencil className="w-4 h-4 me-2" /> تعديل
+                      </Button>
+                      <Button variant="destructive" size="sm" onClick={() => handleDelete(ev.id)} disabled={deleteEvidence.isPending}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </Card>
               ))}

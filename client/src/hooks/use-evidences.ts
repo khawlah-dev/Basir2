@@ -59,3 +59,49 @@ export function useApproveEvidence() {
     },
   });
 }
+
+export function useUpdateEvidence() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<InsertEvidence> }) => {
+      const url = buildUrl(api.evidences.update.path, { id });
+      const res = await fetch(url, {
+        method: api.evidences.update.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to update evidence");
+      }
+      return api.evidences.update.responses[200].parse(await res.json());
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.evidences.list.path] });
+      toast({ title: "نجاح", description: "تم تحديث الشاهد بنجاح" });
+    },
+  });
+}
+
+export function useDeleteEvidence() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const url = buildUrl(api.evidences.delete.path, { id });
+      const res = await fetch(url, {
+        method: api.evidences.delete.method,
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to delete evidence");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.evidences.list.path] });
+      toast({ title: "نجاح", description: "تم حذف الشاهد بنجاح" });
+    },
+  });
+}

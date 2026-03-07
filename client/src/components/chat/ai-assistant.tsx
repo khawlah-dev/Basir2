@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Bot, X, Send, Sparkles } from "lucide-react";
 import { useAIChat } from "@/hooks/use-ai";
+import ReactMarkdown from "react-markdown";
 
 export function AIAssistant() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,11 +16,11 @@ export function AIAssistant() {
 
   const handleSend = async () => {
     if (!input.trim()) return;
-    
+
     const userMsg = input;
     setInput("");
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
-    
+
     try {
       const res = await chatMutation.mutateAsync(userMsg);
       setMessages(prev => [...prev, { role: 'ai', content: res.reply }]);
@@ -60,12 +61,24 @@ export function AIAssistant() {
           <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-4 bg-muted/10">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed ${
-                  msg.role === 'user' 
-                    ? 'bg-primary text-primary-foreground rounded-br-sm' 
-                    : 'bg-muted border border-border rounded-bl-sm text-foreground'
-                }`}>
-                  {msg.content}
+                <div className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'user'
+                    ? 'bg-primary text-primary-foreground rounded-br-sm'
+                    : 'bg-muted border border-border rounded-bl-sm text-foreground prose prose-sm max-w-none'
+                  }`}>
+                  {msg.role === 'ai' ? (
+                    <ReactMarkdown
+                      components={{
+                        p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                        ul: ({ node, ...props }) => <ul className="list-disc ms-4 mb-2" {...props} />,
+                        li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                        strong: ({ node, ...props }) => <strong className="font-bold text-primary" {...props} />,
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  ) : (
+                    msg.content
+                  )}
                 </div>
               </div>
             ))}
@@ -83,16 +96,16 @@ export function AIAssistant() {
           {/* Input */}
           <div className="p-3 bg-background border-t">
             <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex gap-2">
-              <Input 
+              <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="اكتب سؤالك هنا..."
                 className="rounded-full bg-muted/50 border-transparent focus-visible:ring-primary/20"
                 disabled={chatMutation.isPending}
               />
-              <Button 
-                type="submit" 
-                size="icon" 
+              <Button
+                type="submit"
+                size="icon"
                 className="rounded-full shrink-0"
                 disabled={chatMutation.isPending || !input.trim()}
               >

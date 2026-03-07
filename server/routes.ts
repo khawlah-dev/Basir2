@@ -1,10 +1,14 @@
 import "dotenv/config";
-import type { Express } from "express";
+import express, { type Express } from "express";
 import type { Server } from "http";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
+import { type InsertEvidence } from "@shared/schema";
 import expressSession from "express-session";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 
 let API_KEYS: string[] = [];
 let currentKeyIndex = 0;
@@ -65,6 +69,34 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+
+  // Ensure upload directory exists
+  const uploadDir = path.join(process.cwd(), "uploads");
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+
+  // Multer configuration
+  const storageConfig = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+  });
+
+  const upload = multer({
+    storage: storageConfig,
+    limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+  });
+
+  // Static files for uploads
+  app.use("/uploads", (req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  }, express.static(uploadDir));
 
   // Session setup
   app.use(expressSession({
@@ -175,10 +207,42 @@ export async function registerRoutes(
     res.json(evidences);
   });
 
-  app.post(api.evidences.create.path, async (req, res) => {
-    const input = api.evidences.create.input.parse(req.body);
-    const evidence = await storage.createEvidence(input);
-    res.status(201).json(evidence);
+  app.post(api.evidences.create.path, upload.single('file'), async (req, res) => {
+    try {
+      const teacherId = parseInt(req.body.teacherId);
+      const criteria = req.body.criteria;
+      const description = req.body.description;
+
+      if (isNaN(teacherId)) {
+        console.error("Teacher ID is NaN:", req.body.teacherId);
+        return res.status(400).json({ message: "Invalid Teacher ID" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const fileUrl = `/uploads/${req.file.filename}`;
+      const mimeType = req.file.mimetype;
+      let fileType = "document";
+
+      if (mimeType.startsWith("image/")) fileType = "image";
+      else if (mimeType.startsWith("video/")) fileType = "video";
+
+      const evidenceData: InsertEvidence = {
+        teacherId,
+        criteria,
+        description,
+        fileUrl,
+        fileType
+      };
+
+      const evidence = await storage.createEvidence(evidenceData);
+      res.status(201).json(evidence);
+    } catch (e: any) {
+      console.error("Evidence creation error:", e);
+      res.status(400).json({ message: e.message || "Invalid request" });
+    }
   });
 
   app.patch(api.evidences.update.path, async (req, res) => {
@@ -290,7 +354,21 @@ export async function registerRoutes(
   }
   `;
 
-      const imageBase64s = teacherEvidences.map(e => e.imageUrl).filter(Boolean);
+      const imageBase64s = []; // AI evaluation currently supports images only
+      // We'll need to adapt this if we want Gemini to see the files from disk
+      // For now, we'll keep it simple or just filter for images and read them
+      for (const e of teacherEvidences) {
+        if (e.fileType === 'image') {
+          try {
+            const filePath = path.join(process.cwd(), e.fileUrl.startsWith('/') ? e.fileUrl.slice(1) : e.fileUrl);
+            const data = fs.readFileSync(filePath);
+            const base64 = data.toString('base64');
+            imageBase64s.push(`data:image/jpeg;base64,${base64}`);
+          } catch (err) {
+            console.error("Error reading image for Gemini:", err);
+          }
+        }
+      }
 
       const resultText = await callGemini(prompt, imageBase64s);
 

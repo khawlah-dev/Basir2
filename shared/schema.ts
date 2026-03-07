@@ -9,7 +9,7 @@ export const schools = pgTable("schools", {
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(), 
+  username: text("username").notNull().unique(),
   password: text("password").notNull(),
   name: text("name").notNull(),
   role: text("role").notNull(), // 'admin', 'principal', 'teacher'
@@ -29,7 +29,8 @@ export const evidences = pgTable("evidences", {
   teacherId: integer("teacher_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   criteria: text("criteria").notNull(), // which criteria it covers
   description: text("description").notNull(),
-  imageUrl: text("image_url").notNull(), // base64 string
+  fileUrl: text("file_url").notNull(), // path to the file
+  fileType: text("file_type").notNull().default("image"), // image, video, document
   status: text("status").notNull().default("pending"), // pending, approved
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -58,6 +59,7 @@ export const insertSchoolSchema = createInsertSchema(schools).omit({ id: true })
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
 export const insertFlagSchema = createInsertSchema(flags).omit({ id: true, createdAt: true });
 export const insertEvidenceSchema = createInsertSchema(evidences).omit({ id: true, createdAt: true, status: true });
+export const createEvidenceSchema = insertEvidenceSchema.omit({ fileUrl: true, fileType: true });
 export const insertIndicatorSchema = createInsertSchema(indicators).omit({ id: true, createdAt: true, status: true });
 export const insertEvaluationSchema = createInsertSchema(evaluations).omit({ id: true, createdAt: true });
 

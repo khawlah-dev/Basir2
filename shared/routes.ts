@@ -3,7 +3,7 @@ import {
   insertSchoolSchema, schools,
   insertUserSchema, users,
   insertFlagSchema, flags,
-  insertEvidenceSchema, evidences,
+  insertEvidenceSchema, createEvidenceSchema, evidences,
   insertIndicatorSchema, indicators,
   insertEvaluationSchema, evaluations
 } from './schema';
@@ -111,7 +111,7 @@ export const api = {
     create: {
       method: 'POST' as const,
       path: '/api/evidences' as const,
-      input: insertEvidenceSchema,
+      input: createEvidenceSchema,
       responses: { 201: z.custom<typeof evidences.$inferSelect>() }
     },
     update: {

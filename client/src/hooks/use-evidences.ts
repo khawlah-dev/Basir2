@@ -19,18 +19,20 @@ export function useCreateEvidence() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (data: InsertEvidence) => {
+    mutationFn: async (data: FormData) => {
       const res = await fetch(api.evidences.create.path, {
         method: api.evidences.create.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: data,
         credentials: "include",
       });
+
+      const body = await res.json().catch(() => ({}));
+
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || "Failed to create evidence");
+        throw new Error(body.message || "Failed to create evidence");
       }
-      return api.evidences.create.responses[201].parse(await res.json());
+
+      return api.evidences.create.responses[201].parse(body);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.evidences.list.path] });
@@ -50,8 +52,9 @@ export function useApproveEvidence() {
         method: api.evidences.approve.method,
         credentials: "include",
       });
-      if (!res.ok) throw new Error("Failed to approve evidence");
-      return api.evidences.approve.responses[200].parse(await res.json());
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.message || "Failed to approve evidence");
+      return api.evidences.approve.responses[200].parse(body);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.evidences.list.path] });
@@ -73,11 +76,11 @@ export function useUpdateEvidence() {
         body: JSON.stringify(data),
         credentials: "include",
       });
+      const body = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || "Failed to update evidence");
+        throw new Error(body.message || "Failed to update evidence");
       }
-      return api.evidences.update.responses[200].parse(await res.json());
+      return api.evidences.update.responses[200].parse(body);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.evidences.list.path] });

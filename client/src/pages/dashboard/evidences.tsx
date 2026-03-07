@@ -7,8 +7,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, CheckCircle, FileImage, Clock, Pencil, Trash2, X } from "lucide-react";
-import { ImageUpload } from "@/components/upload/image-upload";
+import { Loader2, CheckCircle, Clock, Pencil, Trash2, X, FileImage, FileVideo, FileText, Download, PlayCircle, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { type Evidence } from "@shared/schema";
 
 const CRITERIA = [
@@ -40,41 +40,46 @@ export function EvidencesManager() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [criteria, setCriteria] = useState("");
   const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [file, setFile] = useState<File | null>(null);
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!criteria || !description || !imageUrl) return;
+    if (!criteria || !description) return;
+    if (!editingId && !file) return;
     if (!user) return;
 
     if (editingId !== null) {
+      // Update is still JSON for now since we're not replacing the file in update yet
       await updateEvidence.mutateAsync({
         id: editingId,
         data: {
           teacherId: user.id,
           criteria,
           description,
-          imageUrl
-        }
+        } as any
       });
       setEditingId(null);
     } else {
-      await createEvidence.mutateAsync({
-        teacherId: user.id,
-        criteria,
-        description,
-        imageUrl
-      });
+      const formData = new FormData();
+      formData.append("teacherId", user.id.toString());
+      formData.append("criteria", criteria);
+      formData.append("description", description);
+      if (file) formData.append("file", file);
+
+      await createEvidence.mutateAsync(formData);
     }
 
-    setCriteria(""); setDescription(""); setImageUrl("");
+    setCriteria(""); setDescription(""); setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleEdit = (ev: Evidence) => {
     setEditingId(ev.id);
     setCriteria(ev.criteria);
     setDescription(ev.description);
-    setImageUrl(ev.imageUrl || "");
+    setFile(null);
     formRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -83,14 +88,16 @@ export function EvidencesManager() {
       await deleteEvidence.mutateAsync(id);
       if (editingId === id) {
         setEditingId(null);
-        setCriteria(""); setDescription(""); setImageUrl("");
+        setCriteria(""); setDescription(""); setFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
       }
     }
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setCriteria(""); setDescription(""); setImageUrl("");
+    setCriteria(""); setDescription(""); setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   if (user?.role === 'teacher') {
@@ -117,8 +124,16 @@ export function EvidencesManager() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">صورة الشاهد</label>
-                <ImageUpload value={imageUrl} onChange={setImageUrl} />
+                <label className="text-sm font-medium">الملف (صورة، فيديو، أو مستند)</label>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                  accept="image/*,video/*,application/pdf,.doc,.docx"
+                  required={!editingId}
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">المجلد يدعم الصور، الفيديوهات، وملفات PDF/Word</p>
               </div>
 
               <div className="space-y-2">
@@ -165,8 +180,46 @@ export function EvidencesManager() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-12">
               {evidences?.filter(ev => ev.teacherId === user.id).map(ev => (
                 <Card key={ev.id} className="overflow-hidden flex flex-col border shadow-sm">
-                  <div className="h-40 w-full bg-muted relative">
-                    <img src={ev.imageUrl} alt="شاهد" className="w-full h-full object-cover" />
+                  <div className="h-40 w-full bg-muted relative flex items-center justify-center overflow-hidden group">
+                    {ev.fileType === 'image' && <img src={ev.fileUrl} alt="شاهد" className="w-full h-full object-cover transition-transform group-hover:scale-105" />}
+                    {ev.fileType === 'video' && (
+                      <div className="relative w-full h-full flex items-center justify-center bg-black">
+                        <video src={ev.fileUrl} className="w-full h-full object-cover opacity-60" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <PlayCircle className="w-12 h-12 text-white opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all cursor-pointer" />
+                        </div>
+                      </div>
+                    )}
+                    {ev.fileType === 'document' && (
+                      <div className="flex flex-col items-center gap-2">
+                        <FileText className="w-12 h-12 text-muted-foreground" />
+                        <span className="text-xs font-medium">مستند</span>
+                      </div>
+                    )}
+
+                    {/* Overlay for quick view */}
+                    {(ev.fileType === 'image' || ev.fileType === 'video') && (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                            <Eye className="w-6 h-6 text-white" />
+                          </div>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black border-none">
+                          <DialogHeader className="absolute top-0 inset-x-0 p-4 bg-gradient-to-b from-black/80 to-transparent z-10">
+                            <DialogTitle className="text-white">{ev.criteria}</DialogTitle>
+                          </DialogHeader>
+                          <div className="flex items-center justify-center min-h-[50vh]">
+                            {ev.fileType === 'image' ? (
+                              <img src={ev.fileUrl} alt="شاهد" className="max-w-full max-h-[85vh] object-contain" />
+                            ) : (
+                              <video src={ev.fileUrl} controls autoPlay className="max-w-full max-h-[85vh]" />
+                            )}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+
                     {ev.status === 'approved' ? (
                       <div className="absolute top-2 end-2 bg-emerald-500 text-white text-xs px-2 py-1 rounded-md font-bold flex items-center gap-1">
                         <CheckCircle className="w-3 h-3" /> معتمد
@@ -179,7 +232,15 @@ export function EvidencesManager() {
                   </div>
                   <div className="p-4 flex flex-col flex-1">
                     <h4 className="font-bold text-md text-primary">{ev.criteria}</h4>
-                    <p className="text-sm text-muted-foreground mt-2 line-clamp-3 leading-relaxed flex-1">{ev.description}</p>
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed flex-1">{ev.description}</p>
+
+                    {ev.fileType === 'document' && (
+                      <Button variant="outline" size="sm" asChild className="mb-2">
+                        <a href={ev.fileUrl} target="_blank" rel="noreferrer">
+                          <Download className="w-3 h-3 me-2" /> عرض المستند
+                        </a>
+                      </Button>
+                    )}
 
                     <div className="mt-4 flex gap-2 pt-4 border-t">
                       <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(ev)}>
@@ -217,10 +278,54 @@ export function EvidencesManager() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {evidences?.map(ev => (
-            <Card key={ev.id} className="overflow-hidden flex flex-col border shadow-sm">
-              <div className="h-48 w-full bg-muted relative">
-                {/* Normally we'd use a real src, base64 works here */}
-                <img src={ev.imageUrl} alt="شاهد" className="w-full h-full object-cover" />
+            <Card key={ev.id} className="overflow-hidden flex flex-col border shadow-sm group">
+              <div className="h-48 w-full bg-muted relative flex items-center justify-center overflow-hidden">
+                {ev.fileType === 'image' && <img src={ev.fileUrl} alt="شاهد" className="w-full h-full object-cover transition-transform group-hover:scale-105" />}
+                {ev.fileType === 'video' && (
+                  <div className="relative w-full h-full flex items-center justify-center bg-black">
+                    <video src={ev.fileUrl} className="w-full h-full object-cover opacity-60" />
+                    <div className="absolute inset-0 flex items-center justify-center cursor-pointer">
+                      <PlayCircle className="w-14 h-14 text-white opacity-90 group-hover:scale-110 transition-transform" />
+                    </div>
+                  </div>
+                )}
+                {ev.fileType === 'document' && (
+                  <div className="flex flex-col items-center gap-2">
+                    <FileText className="w-12 h-12 text-muted-foreground" />
+                    <span className="text-sm font-medium">مستند (PDF/Word)</span>
+                    <Button variant="ghost" asChild className="text-primary hover:text-primary/80">
+                      <a href={ev.fileUrl} target="_blank" rel="noreferrer">فتح الملف</a>
+                    </Button>
+                  </div>
+                )}
+
+                {/* Lightbox for large view */}
+                {(ev.fileType === 'image' || ev.fileType === 'video') && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer z-20">
+                        <Eye className="w-8 h-8 text-white" />
+                      </div>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-5xl p-0 overflow-hidden bg-black border-none">
+                      <DialogHeader className="absolute top-0 inset-x-0 p-4 bg-gradient-to-b from-black/80 to-transparent z-10">
+                        <DialogTitle className="text-white flex items-center gap-2">
+                          {ev.criteria}
+                          <span className="text-xs font-normal opacity-70">
+                            (بواسطة: {users?.find(u => u.id === ev.teacherId)?.name})
+                          </span>
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="flex items-center justify-center min-h-[60vh]">
+                        {ev.fileType === 'image' ? (
+                          <img src={ev.fileUrl} alt="شاهد" className="max-w-full max-h-[90vh] object-contain" />
+                        ) : (
+                          <video src={ev.fileUrl} controls autoPlay className="max-w-full max-h-[90vh]" />
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
                 <div className="absolute top-2 start-2 bg-background/90 backdrop-blur text-xs px-2 py-1 rounded-md font-bold">
                   {users?.find(u => u.id === ev.teacherId)?.name}
                 </div>

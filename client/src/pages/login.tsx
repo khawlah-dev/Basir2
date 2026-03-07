@@ -1,18 +1,17 @@
-import { useState } from "react";
 import { useLogin } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Loader2, UserRound, Lock } from "lucide-react";
 
 export function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const loginMutation = useLogin();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    loginMutation.mutate({ username, password });
+  const handleRoleLogin = (role: 'teacher' | 'principal' | 'admin') => {
+    const credentials = {
+      teacher: { username: "teacher", password: "123" },
+      principal: { username: "principal", password: "123" },
+      admin: { username: "admin", password: "admin123" }
+    };
+    loginMutation.mutate(credentials[role]);
   };
 
   return (
@@ -30,44 +29,57 @@ export function Login() {
           <p className="text-muted-foreground mt-2 font-medium">مرحباً بك في منصة بصير التعليمية</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2 relative">
-            <label className="text-sm font-bold text-foreground/80">اسم المستخدم</label>
-            <div className="relative">
-              <UserRound className="w-5 h-5 absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input 
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="أدخل اسم المستخدم"
-                className="ps-10 h-12 bg-white/50 border-primary/20 focus-visible:ring-primary/30"
-                dir="ltr"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2 relative">
-            <label className="text-sm font-bold text-foreground/80">كلمة المرور</label>
-            <div className="relative">
-              <Lock className="w-5 h-5 absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input 
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="ps-10 h-12 bg-white/50 border-primary/20 focus-visible:ring-primary/30 text-start"
-                dir="ltr"
-              />
-            </div>
-          </div>
-
-          <Button 
-            type="submit" 
-            className="w-full h-12 text-lg font-bold mt-4 bg-gradient-to-l from-primary to-accent hover:opacity-90 transition-all shadow-lg shadow-primary/25 hover-elevate"
+        <div className="space-y-4">
+          <button
+            onClick={() => handleRoleLogin('principal')}
             disabled={loginMutation.isPending}
+            className="w-full text-start p-4 rounded-xl border border-primary/20 bg-white/50 hover:bg-white hover:border-primary hover:shadow-lg transition-all group relative overflow-hidden flex items-center gap-4"
           >
-            {loginMutation.isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : "دخول"}
-          </Button>
-        </form>
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+              <Lock className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-foreground">دخول كمدير مدرسة</h3>
+              <p className="text-sm text-muted-foreground">صلاحيات إدارة المعلمين والتقييمات</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => handleRoleLogin('teacher')}
+            disabled={loginMutation.isPending}
+            className="w-full text-start p-4 rounded-xl border border-primary/20 bg-white/50 hover:bg-white hover:border-primary hover:shadow-lg transition-all group relative overflow-hidden flex items-center gap-4"
+          >
+            <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-colors">
+              <UserRound className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-foreground">دخول كمعلم</h3>
+              <p className="text-sm text-muted-foreground">صلاحيات رفع الشواهد والمؤشرات</p>
+            </div>
+          </button>
+
+          <div className="pt-4 border-t border-border/50">
+            <button
+              onClick={() => handleRoleLogin('admin')}
+              disabled={loginMutation.isPending}
+              className="w-full text-start p-3 rounded-lg border border-transparent hover:bg-muted/50 transition-colors flex items-center gap-3"
+            >
+              <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500">
+                <Lock className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-foreground">دخول كمدير نظام</h3>
+                <p className="text-xs text-muted-foreground">للتحكم الشامل للمنصة</p>
+              </div>
+            </button>
+          </div>
+
+          {loginMutation.isPending && (
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center rounded-xl z-20">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          )}
+        </div>
       </Card>
     </div>
   );

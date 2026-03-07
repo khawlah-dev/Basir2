@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/theme-provider";
 import NotFound from "@/pages/not-found";
 
 // Pages
@@ -22,7 +23,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/login" component={Login} />
-      
+
       {/* Dashboard Routes */}
       <Route path="/dashboard" component={DashboardHome} />
       <Route path="/dashboard/schools" component={SchoolsManager} />
@@ -31,7 +32,7 @@ function Router() {
       <Route path="/dashboard/indicators" component={IndicatorsManager} />
       <Route path="/dashboard/flags" component={FlagsManager} />
       <Route path="/dashboard/evaluations" component={EvaluationsManager} />
-      
+
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
@@ -46,12 +47,14 @@ function App() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="system" storageKey="basir-theme">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

@@ -93,7 +93,7 @@
   }
   
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased transition-colors duration-500 ease-in-out;
     font-family: var(--font-sans);
   }
 
@@ -108,7 +108,7 @@
     @apply transition-all duration-300;
   }
   .hover-elevate:hover {
-    @apply -translate-y-1 shadow-lg shadow-primary/10 border-primary/30;
+    @apply -translate-y-1 shadow-lg shadow-primary/20 border-primary/40;
   }
   .active-elevate-2:active {
     @apply translate-y-0 shadow-sm;

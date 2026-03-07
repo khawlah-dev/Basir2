@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Bot, Star, Award } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 export function EvaluationsManager() {
   const { data: user } = useAuth();
@@ -81,17 +82,17 @@ export function EvaluationsManager() {
                   </div>
                 </div>
                 {/* Render tie-breaker and detailed info */}
-                {(evaluation.details as any)?.tieBreakerSummary && (
-                  <div className="p-4 bg-muted/30 border-t">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Bot className="w-4 h-4 text-primary" />
-                      <span className="font-bold text-sm text-foreground">الرؤية التحليلية للمفاضلة</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {(evaluation.details as any).tieBreakerSummary}
-                    </p>
+                <div className="p-4 bg-muted/30 border-t">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Bot className="w-4 h-4 text-primary" />
+                    <span className="font-bold text-sm text-foreground">الرؤية التحليلية للمفاضلة</span>
                   </div>
-                )}
+                  <div className="text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none prose-p:mb-2 prose-ul:list-disc prose-ul:ms-4">
+                    <ReactMarkdown>
+                      {(evaluation.details as any).tieBreakerSummary}
+                    </ReactMarkdown>
+                  </div>
+                </div>
               </Card>
             )
           })}

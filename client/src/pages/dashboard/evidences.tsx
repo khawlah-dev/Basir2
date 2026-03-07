@@ -40,14 +40,14 @@ export function EvidencesManager() {
     e.preventDefault();
     if (!criteria || !description || !imageUrl) return;
     if (!user) return;
-    
+
     await createEvidence.mutateAsync({
       teacherId: user.id,
       criteria,
       description,
       imageUrl
     });
-    
+
     setCriteria(""); setDescription(""); setImageUrl("");
   };
 
@@ -79,9 +79,9 @@ export function EvidencesManager() {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">وصف الشاهد</label>
-                <Textarea 
-                  required 
-                  value={description} 
+                <Textarea
+                  required
+                  value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="اكتب وصفاً مختصراً يوضح كيف يغطي هذا الشاهد المعيار المطلوب..."
                   className="min-h-[100px] resize-none"
@@ -94,6 +94,43 @@ export function EvidencesManager() {
               </Button>
             </form>
           </Card>
+
+          <div className="mt-12 mb-6">
+            <h3 className="text-xl font-display font-bold">شواهدي السابقة</h3>
+            <p className="text-muted-foreground mt-1">قائمة بالشواهد التي قمت برفعها مسبقاً لمراجعة حالتها.</p>
+          </div>
+
+          {isLoading ? (
+            <div className="flex justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-12">
+              {evidences?.filter(ev => ev.teacherId === user.id).map(ev => (
+                <Card key={ev.id} className="overflow-hidden flex flex-col border shadow-sm">
+                  <div className="h-40 w-full bg-muted relative">
+                    <img src={ev.imageUrl} alt="شاهد" className="w-full h-full object-cover" />
+                    {ev.status === 'approved' ? (
+                      <div className="absolute top-2 end-2 bg-emerald-500 text-white text-xs px-2 py-1 rounded-md font-bold flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" /> معتمد
+                      </div>
+                    ) : (
+                      <div className="absolute top-2 end-2 bg-amber-500 text-white text-xs px-2 py-1 rounded-md font-bold flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> بانتظار الاعتماد
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 flex flex-col flex-1">
+                    <h4 className="font-bold text-md text-primary">{ev.criteria}</h4>
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-3 leading-relaxed flex-1">{ev.description}</p>
+                  </div>
+                </Card>
+              ))}
+              {evidences?.filter(ev => ev.teacherId === user.id).length === 0 && (
+                <div className="col-span-full py-8 text-center text-muted-foreground bg-muted/30 rounded-lg border border-dashed">
+                  لم تقم برفع أي شواهد حتى الآن.
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </DashboardLayout>
     );
@@ -132,10 +169,10 @@ export function EvidencesManager() {
               <div className="p-5 flex flex-col flex-1">
                 <h4 className="font-bold text-lg text-primary">{ev.criteria}</h4>
                 <p className="text-sm text-muted-foreground mt-2 leading-relaxed flex-1">{ev.description}</p>
-                
+
                 {ev.status === 'pending' && (
-                  <Button 
-                    className="mt-4 w-full bg-emerald-600 hover:bg-emerald-700" 
+                  <Button
+                    className="mt-4 w-full bg-emerald-600 hover:bg-emerald-700"
                     onClick={() => approveEvidence.mutate(ev.id)}
                     disabled={approveEvidence.isPending}
                   >

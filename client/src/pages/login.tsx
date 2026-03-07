@@ -7,7 +7,7 @@ export function Login() {
 
   const handleRoleLogin = (role: 'teacher' | 'principal' | 'admin') => {
     const credentials = {
-      teacher: { username: "teacher", password: "123" },
+      teacher: { username: "a123", password: "123" },
       principal: { username: "principal", password: "123" },
       admin: { username: "admin", password: "admin123" }
     };

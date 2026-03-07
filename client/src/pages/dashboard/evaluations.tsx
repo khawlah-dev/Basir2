@@ -60,7 +60,7 @@ export function EvaluationsManager() {
         <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {evals?.map(evaluation => {
+          {evals?.filter(e => user?.role === 'teacher' ? e.teacherId === user.id : true).map(evaluation => {
             const tUser = users?.find(u => u.id === evaluation.teacherId);
             return (
               <Card key={evaluation.id} className="p-0 border overflow-hidden shadow-sm hover:shadow-md transition-shadow">
@@ -96,7 +96,7 @@ export function EvaluationsManager() {
               </Card>
             )
           })}
-          {evals?.length === 0 && (
+          {evals?.filter(e => user?.role === 'teacher' ? e.teacherId === user.id : true).length === 0 && (
             <div className="col-span-full py-20 text-center text-muted-foreground flex flex-col items-center">
               <Bot className="w-16 h-16 text-muted-foreground/30 mb-4" />
               لا توجد تقييمات منجزة حتى الآن.

@@ -355,8 +355,17 @@ export async function registerRoutes(
 
 async function seedDatabase() {
   const users = await storage.getUsers();
-  if (users.length === 0) {
-    // create admin
+
+  // Ensure we have at least one school
+  let school = (await storage.getSchools())[0];
+  if (!school) {
+    school = await storage.createSchool({
+      name: "مدرسة المعرفة الأهلية"
+    });
+  }
+
+  // Ensure 'admin' exists
+  if (!users.find(u => u.username === "admin")) {
     await storage.createUser({
       name: "مدير النظام",
       username: "admin",
@@ -364,13 +373,11 @@ async function seedDatabase() {
       role: "admin",
       schoolId: null
     });
+  }
 
-    // create a school
-    const school = await storage.createSchool({
-      name: "مدرسة المعرفة الأهلية"
-    });
-
-    // create a principal
+  // Ensure 'principal' exists and has correct password
+  const principal = users.find(u => u.username === "principal");
+  if (!principal) {
     await storage.createUser({
       name: "أحمد القائد",
       username: "principal",
@@ -378,14 +385,21 @@ async function seedDatabase() {
       role: "principal",
       schoolId: school.id
     });
+  } else if (principal.password !== "123") {
+    await storage.updateUser(principal.id, { password: "123" });
+  }
 
-    // create a teacher
+  // Ensure 'a123' (Khawlah) exists and has correct password
+  const khawlah = users.find(u => u.username === "a123");
+  if (!khawlah) {
     await storage.createUser({
-      name: "محمد المعلم",
-      username: "teacher",
+      name: "خولة خالد",
+      username: "a123",
       password: "123",
       role: "teacher",
       schoolId: school.id
     });
+  } else if (khawlah.password !== "123") {
+    await storage.updateUser(khawlah.id, { password: "123" });
   }
 }

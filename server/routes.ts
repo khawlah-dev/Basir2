@@ -26,7 +26,10 @@ function getNextApiKey() {
 }
 
 async function callGemini(prompt: string, imagesBase64: string[] = []) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${getNextApiKey()}`;
+  console.log("Calling Gemini API...");
+  const apiKey = getNextApiKey();
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  console.log("Gemini URL (key hidden):", url.replace(apiKey, "HIDDEN"));
 
   const contents: any[] = [];
 
@@ -296,11 +299,14 @@ export async function registerRoutes(
   });
 
   app.post(api.evaluations.start.path, async (req, res) => {
+    console.log("Evaluation start requested for teacher:", req.body.teacherId);
     try {
       const { teacherId } = api.evaluations.start.input.parse(req.body);
       const evaluatorId = (req.session as any).userId;
+      console.log("Evaluator ID from session:", evaluatorId);
 
       // Get teacher evidences & indicators
+      console.log("Fetching evidences and indicators for teacher...");
       const evidences = await storage.getEvidences();
       const teacherEvidences = evidences.filter(e => e.teacherId === teacherId && e.status === 'approved');
 
@@ -310,6 +316,7 @@ export async function registerRoutes(
       // Get teacher flags (administrative notes)
       const flags = await storage.getFlags();
       const teacherFlags = flags.filter(f => f.teacherId === teacherId);
+      console.log(`Found ${teacherEvidences.length} evidences, ${teacherIndicators.length} indicators, and ${teacherFlags.length} flags.`);
 
       // Combine them to prompt
       const prompt = `قم بتقييم هذا المعلم بناءً على الشواهد، المؤشرات، والملاحظات الإدارية التالية.
@@ -373,7 +380,7 @@ export async function registerRoutes(
       const resultText = await callGemini(prompt, imageBase64s);
 
       // Attempt to parse JSON from response
-      let jsonStr = resultText.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, '').trim();
+      let jsonStr = resultText.replace(/```json/g, '').replace(/```/g, '').trim();
 
       // Extract just the JSON object part to avoid markdown text before/after causing parse errors
       const startIndex = jsonStr.indexOf('{');
@@ -382,12 +389,25 @@ export async function registerRoutes(
         jsonStr = jsonStr.substring(startIndex, endIndex + 1);
       }
 
-      const aiResponse = JSON.parse(jsonStr);
+      let aiResponse: any;
+      try {
+        console.log("Raw AI response text:", resultText);
+        aiResponse = JSON.parse(jsonStr);
+      } catch (parseError: any) {
+        console.error("Failed to parse AI response as JSON:", parseError);
+        console.error("Processed JSON string was:", jsonStr);
+        // Fallback for non-JSON responses
+        aiResponse = {
+          totalScore: 0,
+          tieBreakerSummary: resultText,
+          summary: "فشل استخراج البيانات بصيغة JSON، تم حفظ الرد كنص."
+        };
+      }
 
       const evaluation = await storage.createEvaluation({
         teacherId,
         evaluatorId: evaluatorId || 1,
-        totalScore: aiResponse.totalScore || 0,
+        totalScore: Number(aiResponse.totalScore) || 0,
         details: aiResponse
       });
 

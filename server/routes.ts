@@ -21,7 +21,7 @@ async function callGemini(prompt: string, imagesBase64: string[] = []) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${getNextApiKey()}`;
 
   const contents: any[] = [];
-  
+
   if (imagesBase64.length > 0) {
     const parts = imagesBase64.map(img => {
       // Remove data:image/...;base64, prefix if present
@@ -208,12 +208,12 @@ export async function registerRoutes(
   app.post(api.evaluations.start.path, async (req, res) => {
     try {
       const { teacherId } = api.evaluations.start.input.parse(req.body);
-      const evaluatorId = (req.session as any).userId; 
-      
+      const evaluatorId = (req.session as any).userId;
+
       // Get teacher evidences & indicators
       const evidences = await storage.getEvidences();
       const teacherEvidences = evidences.filter(e => e.teacherId === teacherId && e.status === 'approved');
-      
+
       const indicators = await storage.getIndicators();
       const teacherIndicators = indicators.filter(i => i.teacherId === teacherId && i.status === 'approved');
 
@@ -242,13 +242,13 @@ export async function registerRoutes(
   تنوع اساليب التقييم 10%
 
   الشواهد المعرفية:
-  ${teacherEvidences.map((e, i) => `${i+1}. ${e.criteria} - ${e.description}`).join('\n')}
+  ${teacherEvidences.map((e, i) => `${i + 1}. ${e.criteria} - ${e.description}`).join('\n')}
 
   المؤشرات والجهود (تدريب/تطوع):
-  ${teacherIndicators.map((e, i) => `${i+1}. ${e.title} (${e.type}) - ${e.hours} ساعات`).join('\n')}
+  ${teacherIndicators.map((e, i) => `${i + 1}. ${e.title} (${e.type}) - ${e.hours} ساعات`).join('\n')}
 
   الملاحظات الإدارية والانضباطية:
-  ${teacherFlags.length > 0 ? teacherFlags.map((f, i) => `${i+1}. ${f.note}`).join('\n') : "لا توجد ملاحظات إدارية."}
+  ${teacherFlags.length > 0 ? teacherFlags.map((f, i) => `${i + 1}. ${f.note}`).join('\n') : "لا توجد ملاحظات إدارية."}
 
   قم بإرجاع التقييم بتنسيق JSON فقط كما يلي:
   {
@@ -260,13 +260,21 @@ export async function registerRoutes(
     "summary": "ملخص عام لأداء المعلم"
   }
   `;
-      
+
       const imageBase64s = teacherEvidences.map(e => e.imageUrl).filter(Boolean);
-      
+
       const resultText = await callGemini(prompt, imageBase64s);
-      
+
       // Attempt to parse JSON from response
-      const jsonStr = resultText.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, '').trim();
+      let jsonStr = resultText.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, '').trim();
+
+      // Extract just the JSON object part to avoid markdown text before/after causing parse errors
+      const startIndex = jsonStr.indexOf('{');
+      const endIndex = jsonStr.lastIndexOf('}');
+      if (startIndex !== -1 && endIndex !== -1) {
+        jsonStr = jsonStr.substring(startIndex, endIndex + 1);
+      }
+
       const aiResponse = JSON.parse(jsonStr);
 
       const evaluation = await storage.createEvaluation({
@@ -288,7 +296,7 @@ export async function registerRoutes(
     try {
       const { message } = api.ai.chat.input.parse(req.body);
       const prompt = `أنت مساعد ذكي لمنصة "بصير" التعليمية. مهمتك هي مساعدة المعلمين في فهم ما يحتاجون إرفاقه من شواهد ومؤشرات، وتقديم نصائح حول ذلك.\nسؤال المعلم: ${message}`;
-      
+
       const reply = await callGemini(prompt, []);
       res.json({ reply });
     } catch (e: any) {
@@ -319,7 +327,7 @@ async function seedDatabase() {
       role: "admin",
       schoolId: null
     });
-    
+
     // create a school
     const school = await storage.createSchool({
       name: "مدرسة المعرفة الأهلية"

@@ -5,12 +5,13 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import expressSession from "express-session";
 
-const API_KEYS = process.env.GEMINI_API_KEY
-  ? process.env.GEMINI_API_KEY.split(",").map(k => k.trim())
-  : [];
+let API_KEYS: string[] = [];
 let currentKeyIndex = 0;
 
 function getNextApiKey() {
+  if (API_KEYS.length === 0 && process.env.GEMINI_API_KEY) {
+    API_KEYS = process.env.GEMINI_API_KEY.split(",").map(k => k.trim());
+  }
   if (API_KEYS.length === 0) {
     throw new Error("GEMINI_API_KEY environment variable is missing.");
   }

@@ -106,5 +106,12 @@ export function useDeleteEvidence() {
       queryClient.invalidateQueries({ queryKey: [api.evidences.list.path] });
       toast({ title: "نجاح", description: "تم حذف الشاهد بنجاح" });
     },
+    onError: (error: Error) => {
+      toast({
+        title: "خطأ",
+        description: `فشل حذف الشاهد: ${error.message}`,
+        variant: "destructive"
+      });
+    }
   });
 }

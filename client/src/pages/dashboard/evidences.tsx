@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle, Clock, Pencil, Trash2, X, FileImage, FileVideo, FileText, Download, PlayCircle, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { type Evidence } from "@shared/schema";
@@ -85,11 +86,16 @@ export function EvidencesManager() {
 
   const handleDelete = async (id: number) => {
     if (confirm("هل أنت متأكد من حذف هذا الشاهد نهائياً؟")) {
-      await deleteEvidence.mutateAsync(id);
-      if (editingId === id) {
-        setEditingId(null);
-        setCriteria(""); setDescription(""); setFile(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
+      try {
+        await deleteEvidence.mutateAsync(id);
+
+        if (editingId === id) {
+          setEditingId(null);
+          setCriteria(""); setDescription(""); setFile(null);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+      } catch (error) {
+        console.error("Delete mutation failed:", error);
       }
     }
   };
@@ -114,9 +120,9 @@ export function EvidencesManager() {
           <Card className="p-6 border-border shadow-md">
             <form onSubmit={handleUpload} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium">عنصر التقييم</label>
+                <Label htmlFor="criteria-select">عنصر التقييم</Label>
                 <Select value={criteria} onValueChange={setCriteria} required>
-                  <SelectTrigger><SelectValue placeholder="اختر المعيار" /></SelectTrigger>
+                  <SelectTrigger id="criteria-select"><SelectValue placeholder="اختر المعيار" /></SelectTrigger>
                   <SelectContent>
                     {CRITERIA.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
@@ -124,8 +130,9 @@ export function EvidencesManager() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">الملف (صورة، فيديو، أو مستند)</label>
+                <Label htmlFor="file-upload">الملف (صورة، فيديو، أو مستند)</Label>
                 <input
+                  id="file-upload"
                   type="file"
                   ref={fileInputRef}
                   onChange={(e) => setFile(e.target.files?.[0] || null)}
@@ -137,8 +144,9 @@ export function EvidencesManager() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">وصف الشاهد</label>
+                <Label htmlFor="evidence-description">وصف الشاهد</Label>
                 <Textarea
+                  id="evidence-description"
                   required
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}

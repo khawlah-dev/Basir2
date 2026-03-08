@@ -184,7 +184,13 @@ export function EvidencesManager() {
                     {ev.fileType === 'image' && <img src={ev.fileUrl} alt="شاهد" className="w-full h-full object-cover transition-transform group-hover:scale-105" />}
                     {ev.fileType === 'video' && (
                       <div className="relative w-full h-full flex items-center justify-center bg-black">
-                        <video src={ev.fileUrl} className="w-full h-full object-cover opacity-60" />
+                        <video
+                          src={`${ev.fileUrl}#t=0.1`}
+                          className="w-full h-full object-cover opacity-60"
+                          muted
+                          playsInline
+                          preload="metadata"
+                        />
                         <div className="absolute inset-0 flex items-center justify-center">
                           <PlayCircle className="w-12 h-12 text-white opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all cursor-pointer" />
                         </div>
@@ -213,7 +219,7 @@ export function EvidencesManager() {
                             {ev.fileType === 'image' ? (
                               <img src={ev.fileUrl} alt="شاهد" className="max-w-full max-h-[85vh] object-contain" />
                             ) : (
-                              <video src={ev.fileUrl} controls autoPlay className="max-w-full max-h-[85vh]" />
+                              <video src={ev.fileUrl} controls autoPlay playsInline className="max-w-full max-h-[85vh]" />
                             )}
                           </div>
                         </DialogContent>
@@ -283,7 +289,13 @@ export function EvidencesManager() {
                 {ev.fileType === 'image' && <img src={ev.fileUrl} alt="شاهد" className="w-full h-full object-cover transition-transform group-hover:scale-105" />}
                 {ev.fileType === 'video' && (
                   <div className="relative w-full h-full flex items-center justify-center bg-black">
-                    <video src={ev.fileUrl} className="w-full h-full object-cover opacity-60" />
+                    <video
+                      src={`${ev.fileUrl}#t=0.1`}
+                      className="w-full h-full object-cover opacity-60"
+                      muted
+                      playsInline
+                      preload="metadata"
+                    />
                     <div className="absolute inset-0 flex items-center justify-center cursor-pointer">
                       <PlayCircle className="w-14 h-14 text-white opacity-90 group-hover:scale-110 transition-transform" />
                     </div>
@@ -320,7 +332,7 @@ export function EvidencesManager() {
                         {ev.fileType === 'image' ? (
                           <img src={ev.fileUrl} alt="شاهد" className="max-w-full max-h-[90vh] object-contain" />
                         ) : (
-                          <video src={ev.fileUrl} controls autoPlay className="max-w-full max-h-[90vh]" />
+                          <video src={ev.fileUrl} controls autoPlay playsInline className="max-w-full max-h-[90vh]" />
                         )}
                       </div>
                     </DialogContent>

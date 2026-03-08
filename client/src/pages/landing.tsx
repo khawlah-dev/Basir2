@@ -75,7 +75,7 @@ export function Landing() {
           <div className="relative rounded-[2.5rem] overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-white/20 dark:border-white/5 group">
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10 transition-opacity duration-500"></div>
             <img
-              src="/images/saudi-students.jpg"
+              src="/images/classroom.png"
               alt="بيئة تعليمية"
               className="w-full h-[500px] md:h-[600px] object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
             />

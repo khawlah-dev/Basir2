@@ -9,6 +9,8 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
 let API_KEYS: string[] = [];
 let currentKeyIndex = 0;
 
@@ -25,46 +27,29 @@ function getNextApiKey() {
 }
 
 async function callGemini(prompt: string, imagesBase64: string[] = []) {
-  console.log("Calling Gemini API...");
+  console.log("Calling Gemini API via SDK...");
   const apiKey = getNextApiKey();
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-  console.log("Gemini URL (key hidden):", url.replace(apiKey, "HIDDEN"));
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-  const contents: any[] = [];
+  const parts: any[] = [{ text: prompt }];
 
   if (imagesBase64.length > 0) {
-    const parts = imagesBase64.map(img => {
-      // Remove data:image/...;base64, prefix if present
+    imagesBase64.forEach(img => {
       const base64Data = img.replace(/^data:image\/\w+;base64,/, "");
-      // simple guess for mime type or default to jpeg
       const mimeType = img.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
-      return {
-        inline_data: {
-          mime_type: mimeType,
+      parts.push({
+        inlineData: {
+          mimeType,
           data: base64Data
         }
-      };
+      });
     });
-    contents.push({ parts: [...parts, { text: prompt }] });
-  } else {
-    contents.push({ parts: [{ text: prompt }] });
   }
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ contents })
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
-  }
-
-  const data = await response.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  const result = await model.generateContent(parts);
+  const response = await result.response;
+  return response.text();
 }
 
 export async function registerRoutes(
@@ -497,7 +482,9 @@ export async function registerRoutes(
       const reply = await callGemini(prompt, []);
       res.json({ reply });
     } catch (e: any) {
-      console.error(e);
+      console.error("AI Chat Error Details:", e);
+      // Append to debug.log for persistent record
+      fs.appendFileSync("debug.log", `[${new Date().toISOString()}] AI Chat Error: ${e.message}\n`);
       res.status(500).json({ reply: "عذراً، حدث خطأ أثناء الاتصال بالمساعد الذكي." });
     }
   });

@@ -58,3 +58,110 @@
 [API MONITOR] 2026-03-08T22:42:33.114Z GET /auth/me
 [API MONITOR] 2026-03-08T22:42:33.122Z GET /users
 [API MONITOR] 2026-03-08T22:42:33.125Z GET /evaluations
+[API MONITOR] 2026-03-08T22:54:47.735Z GET /auth/me
+[API MONITOR] 2026-03-08T22:54:47.737Z GET /users
+[API MONITOR] 2026-03-08T22:54:47.742Z GET /evaluations
+[API MONITOR] 2026-03-09T01:56:34.004Z POST /auth/login
+[API MONITOR] 2026-03-09T01:56:35.251Z GET /evaluations
+[API MONITOR] 2026-03-09T01:56:35.254Z GET /users
+[API MONITOR] 2026-03-09T01:56:35.259Z GET /evidences
+[API MONITOR] 2026-03-09T01:56:35.262Z GET /indicators
+[API MONITOR] 2026-03-09T01:57:35.137Z POST /ai/chat
+[API MONITOR] 2026-03-09T02:00:25.182Z GET /auth/me
+[API MONITOR] 2026-03-09T02:00:25.184Z GET /evidences
+[API MONITOR] 2026-03-09T02:00:25.189Z GET /users
+[API MONITOR] 2026-03-09T02:00:52.226Z POST /auth/login
+[API MONITOR] 2026-03-09T02:00:52.970Z GET /evaluations
+[API MONITOR] 2026-03-09T02:00:52.972Z GET /users
+[API MONITOR] 2026-03-09T02:00:52.973Z GET /evidences
+[API MONITOR] 2026-03-09T02:00:52.976Z GET /indicators
+[API MONITOR] 2026-03-09T02:01:57.495Z POST /auth/login
+[API MONITOR] 2026-03-09T02:01:58.682Z GET /evaluations
+[API MONITOR] 2026-03-09T02:01:58.683Z GET /indicators
+[API MONITOR] 2026-03-09T02:02:18.058Z POST /ai/chat
+[API MONITOR] 2026-03-09T02:03:39.029Z GET /auth/me
+[API MONITOR] 2026-03-09T02:03:39.035Z GET /evaluations
+[API MONITOR] 2026-03-09T02:03:39.038Z GET /users
+[API MONITOR] 2026-03-09T02:03:39.040Z GET /evidences
+[API MONITOR] 2026-03-09T02:03:39.044Z GET /indicators
+[API MONITOR] 2026-03-09T02:03:39.050Z GET /evaluations
+[API MONITOR] 2026-03-09T02:03:39.051Z GET /auth/me
+[API MONITOR] 2026-03-09T02:03:39.053Z GET /evidences
+[API MONITOR] 2026-03-09T02:03:39.056Z GET /indicators
+[API MONITOR] 2026-03-09T02:03:39.058Z GET /users
+[API MONITOR] 2026-03-09T02:04:06.052Z POST /auth/login
+[API MONITOR] 2026-03-09T02:05:11.965Z POST /ai/chat
+[2026-03-09T02:05:12.991Z] AI Chat Error: Gemini API error: 404 - {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+[API MONITOR] 2026-03-09T02:06:13.758Z GET /auth/me
+[API MONITOR] 2026-03-09T02:06:13.762Z GET /evaluations
+[API MONITOR] 2026-03-09T02:06:13.766Z GET /users
+[API MONITOR] 2026-03-09T02:06:13.767Z GET /evidences
+[API MONITOR] 2026-03-09T02:06:13.768Z GET /indicators
+[API MONITOR] 2026-03-09T02:06:41.313Z POST /auth/login
+[API MONITOR] 2026-03-09T02:07:09.012Z POST /ai/chat
+[2026-03-09T02:07:09.924Z] AI Chat Error: Gemini API error: 404 - {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash-latest is not found for API version v1, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+[API MONITOR] 2026-03-09T02:08:35.381Z POST /auth/logout
+[API MONITOR] 2026-03-09T02:08:42.911Z POST /auth/login
+[API MONITOR] 2026-03-09T02:09:04.716Z POST /auth/logout
+[API MONITOR] 2026-03-09T02:09:13.136Z POST /auth/login
+[API MONITOR] 2026-03-09T02:09:42.914Z GET /health
+[API MONITOR] 2026-03-09T02:10:12.926Z POST /ai/chat
+[2026-03-09T02:10:13.625Z] AI Chat Error: Gemini API error: 404 - {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash-latest is not found for API version v1, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+[API MONITOR] 2026-03-09T02:19:33.848Z POST /auth/login
+[API MONITOR] 2026-03-09T02:19:34.543Z GET /evaluations
+[API MONITOR] 2026-03-09T02:19:34.545Z GET /users
+[API MONITOR] 2026-03-09T02:19:34.547Z GET /indicators
+[API MONITOR] 2026-03-09T02:19:34.553Z GET /evidences
+[API MONITOR] 2026-03-09T02:19:35.228Z POST /auth/login
+[API MONITOR] 2026-03-09T02:19:35.460Z GET /evidences
+[API MONITOR] 2026-03-09T02:19:35.462Z GET /indicators
+[API MONITOR] 2026-03-09T02:19:35.466Z GET /evaluations
+[API MONITOR] 2026-03-09T02:19:35.468Z GET /users
+[API MONITOR] 2026-03-09T02:19:40.258Z POST /auth/logout
+[API MONITOR] 2026-03-09T02:19:41.808Z POST /auth/login
+[API MONITOR] 2026-03-09T02:19:52.552Z POST /ai/chat
+[2026-03-09T02:19:53.103Z] AI Chat Error: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent: [404 Not Found] models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+[API MONITOR] 2026-03-09T02:20:36.337Z POST /ai/chat
+[2026-03-09T02:20:36.825Z] AI Chat Error: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent: [404 Not Found] models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+[API MONITOR] 2026-03-09T02:21:23.075Z GET /auth/me
+[API MONITOR] 2026-03-09T02:21:23.078Z GET /evaluations
+[API MONITOR] 2026-03-09T02:21:23.079Z GET /users
+[API MONITOR] 2026-03-09T02:21:23.080Z GET /evidences
+[API MONITOR] 2026-03-09T02:21:23.082Z GET /indicators
+[API MONITOR] 2026-03-09T02:29:47.925Z GET /evaluations
+[API MONITOR] 2026-03-09T02:29:47.927Z GET /auth/me
+[API MONITOR] 2026-03-09T02:29:47.928Z GET /evidences
+[API MONITOR] 2026-03-09T02:29:47.928Z GET /indicators
+[API MONITOR] 2026-03-09T02:29:47.931Z GET /users
+[API MONITOR] 2026-03-09T02:29:47.932Z GET /auth/me
+[API MONITOR] 2026-03-09T02:29:47.933Z GET /evaluations
+[API MONITOR] 2026-03-09T02:29:47.934Z GET /users
+[API MONITOR] 2026-03-09T02:29:47.937Z GET /evidences
+[API MONITOR] 2026-03-09T02:29:47.941Z GET /indicators
+[API MONITOR] 2026-03-09T02:30:22.439Z POST /auth/login
+[API MONITOR] 2026-03-09T02:30:23.107Z GET /users
+[API MONITOR] 2026-03-09T02:30:23.109Z GET /evaluations
+[API MONITOR] 2026-03-09T02:30:23.112Z GET /evidences
+[API MONITOR] 2026-03-09T02:30:23.119Z GET /indicators
+[API MONITOR] 2026-03-09T02:30:43.821Z POST /ai/chat
